@@ -1,6 +1,6 @@
 # C-Autograd — Autograd e Machine Learning do Zero em C
 
-Uma implementação **didática e minimalista** de um sistema de diferenciação automática (*reverse-mode autodiff*, ou **autograd**) em C, com suporte a treinamento simples (ML) e base para redes neurais.
+Uma implementação **didática e minimalista** de um sistema de diferenciação automática (*reverse-mode autodiff*, ou **autograd**) em C, com suporte a treinamento simples (ML) e base para redes neurais, visando a criação de um framework.
 
 Este projeto é inspirado por implementações educacionais como o **micrograd** de Andrej Karpathy, que constrói um engine de autograd inteiro em poucas linhas de código, permitindo treinar modelos simples com gradiente descendente.
 
@@ -112,8 +112,8 @@ O -lm é necessário para a biblioteca matemática (pow, log).
 🧭 O que vem em seguida
 Este projeto já implementa um autograd funcional e uma forma simples de treinar parâmetros. A próxima evolução natural inclui:
 
-✨ Adicionar bias e múltiplos parâmetros
-✨ Suportar camadas e ativações (ReLU, Sigmoid, etc.)
-✨ Construir uma rede neural multicamada (MLP)
-✨ Criar unit tests e liberar memória corretamente
-✨ Organizar em múltiplos arquivos (.h / .c)
+[ ] Adicionar bias e múltiplos parâmetros
+[ ] Suportar camadas e ativações (ReLU, Sigmoid, etc.)
+[ ] Construir uma rede neural multicamada (MLP)
+[ ] Criar unit tests e liberar memória corretamente
+[ ] Organizar em múltiplos arquivos (.h / .c)
