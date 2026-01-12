@@ -1,4 +1,4 @@
-# C-Autograd — Autograd e Machine Learning do Zero em C
+# C-Framework — Autograd e Machine Learning do Zero em C
 
 Uma implementação **didática e minimalista** de um sistema de diferenciação automática (*reverse-mode autodiff*, ou **autograd**) em C, com suporte a treinamento simples (ML) e base para redes neurais, visando a criação de um framework.
 
