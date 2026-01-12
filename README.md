@@ -17,7 +17,7 @@ Este repositório contém:
 ✔️ Um exemplo de **regressão linear treinável**  
 ✔️ Base para estender para redes neurais
 
-📌 O objetivo não é competição de performance, e sim **entendimento profundo** da lógica interna de ML.
+O objetivo não é competição de performance, e sim **entendimento profundo** da lógica interna de ML e a criação de um framework simples.
 
 ---
 
@@ -31,7 +31,7 @@ Ele serve como uma **sala de aula prática viva** para:
 - Implementação de ML do zero sem dependências externas
 - Fundamentos de estruturas de dados em C (ponteiros, structs, callbacks)
 
-Esse tipo de implementação é similar à base de grandes frameworks como PyTorch — que também constroem um grafo e propagam gradientes automaticamente — embora em C++ e com otimizações profundas. :contentReference[oaicite:1]{index=1}
+Esse tipo de implementação é similar à base de grandes frameworks como PyTorch, que também constroem um grafo e propagam gradientes automaticamente, embora em C++ e com otimizações profundas.
 
 ---
 
