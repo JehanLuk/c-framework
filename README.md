@@ -61,10 +61,7 @@ Cada operação ou valor é armazenado como um `Node`:
 
 O loop de treinamento faz:
 
-forward → backward → gradient descent step
-
-yaml
-Copiar código
+### forward → backward → gradient descent step
 
 Com a loss definida como **MSE (Mean Squared Error)**.
 
@@ -92,28 +89,31 @@ for (int epoch = 0; epoch < 100; epoch++) {
 
 Esse exemplo aprende o melhor valor para w que aproxima y ≈ w * x.
 
+---
+
 📚 Operações suportadas
-✔ Adição (add)
-✔ Subtração (sub)
-✔ Multiplicação (mul)
-✔ Potência (pow_node)
-✔ Logaritmo (log_node)
+
+1. Adição (add)
+2. Subtração (sub)
+3. Multiplicação (mul)
+4. Potência (pow_node)
+5. Logaritmo (log_node)
 
 Cada uma com seu backward apropriado.
 
-📌 Como compilar
 Compile com:
 
-bash
-Copiar código
-gcc -o c_autograd main.c -lm
-O -lm é necessário para a biblioteca matemática (pow, log).
+> gcc -o c_autograd main.c -lm
+
+OBS: O -lm é necessário para a biblioteca matemática (pow, log).
+
+--- 
 
 🧭 O que vem em seguida
 Este projeto já implementa um autograd funcional e uma forma simples de treinar parâmetros. A próxima evolução natural inclui:
 
-[ ] Adicionar bias e múltiplos parâmetros
-[ ] Suportar camadas e ativações (ReLU, Sigmoid, etc.)
-[ ] Construir uma rede neural multicamada (MLP)
-[ ] Criar unit tests e liberar memória corretamente
-[ ] Organizar em múltiplos arquivos (.h / .c)
+1. Adicionar bias e múltiplos parâmetros
+2. Suportar camadas e ativações (ReLU, Sigmoid, etc.)
+3. Construir uma rede neural multicamada (MLP)
+4. Criar unit tests e liberar memória corretamente
+5. Organizar em múltiplos arquivos (.h / .c)
