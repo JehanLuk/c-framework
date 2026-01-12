@@ -2,7 +2,7 @@
 
 Uma implementação **didática e minimalista** de um sistema de diferenciação automática (*reverse-mode autodiff*, ou **autograd**) em C, com suporte a treinamento simples (ML) e base para redes neurais.
 
-Este projeto é inspirado por implementações educacionais como o **micrograd** de Andrej Karpathy, que constrói um engine de autograd inteiro em poucas linhas de código, permitindo treinar modelos simples com gradiente descendente. :contentReference[oaicite:0]{index=0}
+Este projeto é inspirado por implementações educacionais como o **micrograd** de Andrej Karpathy, que constrói um engine de autograd inteiro em poucas linhas de código, permitindo treinar modelos simples com gradiente descendente.
 
 ---
 
@@ -88,6 +88,8 @@ for (int epoch = 0; epoch < 100; epoch++) {
 
     printf("epoch %d | loss %.4f | weight %.4f\n", epoch, loss->value, w->value);
 }
+```
+
 Esse exemplo aprende o melhor valor para w que aproxima y ≈ w * x.
 
 📚 Operações suportadas
