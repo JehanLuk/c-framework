@@ -109,8 +109,7 @@ OBS: O -lm é necessário para a biblioteca matemática (pow, log).
 
 --- 
 
-🧭 O que vem em seguida
-Este projeto já implementa um autograd funcional e uma forma simples de treinar parâmetros. A próxima evolução natural inclui:
+🧭 Este projeto já implementa um autograd funcional e uma forma simples de treinar parâmetros. As próximas novidades incluem:
 
 1. Adicionar bias e múltiplos parâmetros
 2. Suportar camadas e ativações (ReLU, Sigmoid, etc.)
