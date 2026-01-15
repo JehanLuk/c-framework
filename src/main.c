@@ -2,12 +2,18 @@
 #include <stdlib.h>
 #include <math.h>
 
+//Tensor struct for dataset storing and math base.
+typedef struct {
+        int size;
+        double* data;
+} Tensor;
+
 //Node struct definition and creation.
 typedef struct Node{
-        double value;
-        double grad;
+        Tensor value;
+        Tensor grad;
 
-        double extra;
+        Tensor extra;
 
         struct Node* right;
         struct Node* left;
@@ -15,11 +21,19 @@ typedef struct Node{
         void (*backward)(struct Node*);
 } Node;
 
-Node* node(double value) {
-        Node* n = (Node*)malloc(sizeof(Node));
+Tensor tensor_scalar(double v) {
+        Tensor t;
+        t.size = 1;
+        t.data = malloc(sizeof(double));
+        t.data[0] = v;
+        return t;
+}
 
-        n->value = value;
-        n->grad = 0.0;
+Node* node(double value) {
+        Node* n = malloc(sizeof(Node));
+
+        n->value = tensor_scalar(value);
+        n->grad = tensor_scalar(0.0);
         n->right = NULL;
         n->left = NULL;
         n->backward = NULL;
@@ -30,12 +44,16 @@ Node* node(double value) {
 //Operations
 
 void backward_add(Node* self) {
-        self->left->grad += self->grad;
+        double g = self->grad.data[0];
+
+        self->left->grad.data[0] += g;
 }
 
 Node* add(Node* a) {
+        double va = a->value.data[0];
         Node* cons = node(1.0);
-        Node* out = node(a->value + cons->value);
+        double vcons = cons->value.data[0];
+        Node* out = node(va + vcons);
 
         out->left = a;
         out->right = cons;
@@ -45,12 +63,17 @@ Node* add(Node* a) {
 }
 
 void backward_sub(Node* self) {
-        self->left->grad += 1.0 * self->grad;
-        self->right->grad += -1.0 * self->grad;
+        double g = self->grad.data[0];
+
+        self->left->grad.data[0] += 1.0 * g;
+        self->right->grad.data[0] += -1.0 * g;
 }
 
 Node* sub(Node* a, Node* b) {
-        Node* out = node(a->value - b->value);
+        double va = a->value.data[0];
+        double vb = b->value.data[0];
+        
+        Node* out = node(va - vb);
 
         out->left = a;
         out->right = b;
@@ -60,12 +83,17 @@ Node* sub(Node* a, Node* b) {
 }
 
 void backward_mul(Node* self) {
-        self->left->grad += self->right->value * self->grad;
-        self->right->grad += self->left->value * self->grad;
+        double g = self->grad.data[0];
+        
+        self->left->grad.data[0] += self->right->value.data[0] * g;
+        self->right->grad.data[0] += self->left->value.data[0] * g;
 }
 
 Node* mul(Node* x, Node* y) {
-        Node* out = node(x->value * y->value);
+        double vx = x->value.data[0];
+        double vy = y->value.data[0];
+
+        Node* out = node(vx * vy);
 
         out->left = x;
         out->right = y;
@@ -75,28 +103,36 @@ Node* mul(Node* x, Node* y) {
 }
 
 void backward_pow(Node* self) {
-        double x = self->left->value;
-        double k = self->extra;
+        double g = self->grad.data[0];
 
-        self->left->grad += k * pow(x, k - 1.0) * self->grad;
+        double x = self->left->value.data[0];
+        double k = self->extra.data[0];
+
+        self->left->grad.data[0] += k * pow(x, k - 1.0) * g;
 }
 
 Node* pow_node(Node* x, double k) {
-        Node* out = node(pow(x->value, k));
+        double vx = x->value.data[0];
+
+        Node* out = node(pow(vx, k));
 
         out->left = x;
-        out->extra = k;
+        out->extra = tensor_scalar(k);
         out->backward = backward_pow;
 
         return out;
 }
 
 void backward_log(Node* self) {
-        self->left->grad += (1.0 / self->left->value) * self->grad;
+        double g = self->grad.data[0];
+
+        self->left->grad.data[0] += (1.0 / self->left->value.data[0]) * g;
 }
 
 Node* log_node(Node* b) {
-        Node* out = node(log(b->value));
+        double vb = b->value.data[0];
+
+        Node* out = node(log(vb));
 
         out->left = b;
         out->backward = backward_log;
@@ -121,7 +157,7 @@ void backward(Node* loss) {
 
         topo(loss, order, &size);
 
-        loss->grad = 1.0;
+        loss->grad.data[0] = 1.0;
 
         for (int i = size - 1; i >= 0; i--) {
                 if(order[i]->backward) {
@@ -139,8 +175,8 @@ Node* mse(Node* pred, Node* target) {
 
 void step(Node** params, int count, double lr) {
         for (int i = 0; i < count; i++) {
-                params[i]->value -= lr * params[i]->grad;
-                params[i]->grad = 0.0;
+                params[i]->value.data[0] -= lr * params[i]->grad.data[0];
+                params[i]->grad.data[0] = 0.0;
         }
 }
 
@@ -156,6 +192,6 @@ int main() {
                 backward(loss);
                 step(&w, 1, 0.01);
 
-                printf("epoch %d | loss %.4f | weight %.4f\n", epoch, loss->value, w->value);
+                printf("epoch %d | loss %.4f | weight %.4f\n", epoch, loss->value.data[0], w->value.data[0]);
         }
 }
