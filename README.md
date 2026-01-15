@@ -1,5 +1,10 @@
 # C-Framework — Autograd e Machine Learning do Zero em C
 
+![Language](https://img.shields.io/badge/language-C-blue)
+![Status](https://img.shields.io/badge/status-experimental-B06500)
+![Autograd](https://img.shields.io/badge/feature-autograd-purple)
+![Level](https://img.shields.io/badge/level-low--level%20ML-red)
+
 Uma implementação **didática e minimalista** de um sistema de diferenciação automática (*reverse-mode autodiff*, ou **autograd**) em C, com suporte a treinamento simples (ML) e base para redes neurais, visando a criação de um framework.
 
 Este projeto é inspirado por implementações educacionais como o **micrograd** de Andrej Karpathy, que constrói um engine de autograd inteiro em poucas linhas de código, permitindo treinar modelos simples com gradiente descendente.
@@ -10,11 +15,11 @@ Este projeto é inspirado por implementações educacionais como o **micrograd**
 
 Este repositório contém:
 
-✔️ Um **motor de autograd** em C — constrói um grafo computacional  
-✔️ Operações matemáticas básicas com derivadas (`add`, `sub`, `mul`, `pow`, `log`)  
-✔️ Backpropagation via topological sort  
-✔️ Loop de treinamento com gradiente descendente  
-✔️ Um exemplo de **regressão linear treinável**  
+✔️ Um **motor de autograd** em C, constrói um grafo computational\
+✔️ Operações matemáticas básicas com derivadas (`add`, `sub`, `mul`, `pow`, `log`)\
+✔️ Backpropagation via topological sort\
+✔️ Loop de treinamento com gradiente descendente\
+✔️ Um exemplo de **regressão linear treinável**\
 ✔️ Base para estender para redes neurais
 
 O objetivo não é competição de performance, e sim **entendimento profundo** da lógica interna de ML e a criação de um framework simples.
@@ -50,9 +55,9 @@ Cada operação ou valor é armazenado como um `Node`:
 
 ### 🔁 Construção do grafo e backpropagation
 
-1. O forward constrói um grafo de dependências automaticamente  
-2. A função `topo()` ordena os nós em uma sequência válida  
-3. `backward(loss)` caminha a lista do final para o início  
+1. O forward constrói um grafo de dependências automaticamente
+2. A função `topo()` ordena os nós em uma sequência válida
+3. `backward(loss)` caminha a lista do final para o início
 4. Cada nó aplica sua derivada local multiplicada pelo gradiente acumulado
 
 ---
@@ -83,7 +88,7 @@ for (int epoch = 0; epoch < 100; epoch++) {
     backward(loss);
     step(&w, 1, 0.01);
 
-    printf("epoch %d | loss %.4f | weight %.4f\n", epoch, loss->value, w->value);
+    printf("epoch %d | loss %.4f | weight %.4f\n", epoch, loss->value.data[0], w->value.data[0]);
 }
 ```
 
@@ -107,7 +112,7 @@ Compile com:
 
 OBS: O -lm é necessário para a biblioteca matemática (pow, log).
 
---- 
+---
 
 🧭 Este projeto já implementa um autograd funcional e uma forma simples de treinar parâmetros. As próximas novidades incluem:
 
