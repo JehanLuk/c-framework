@@ -219,11 +219,9 @@ Erro global:
 extern MLInCERROR mlinc_errno;
 ```
 
----
-
 # Exportação do grafo
 
-O projeto possui integração com GraphViz:
+O projeto possui integração com [GraphViz](https://graphviz.org/):
 
 ```c
 graph_export(...)
