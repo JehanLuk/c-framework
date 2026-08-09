@@ -1,123 +1,304 @@
-# C-Framework — Autograd e Machine Learning do Zero em C
+# MLInC — Machine Learning in C
 
-![Language](https://img.shields.io/badge/language-C-blue)
-![Status](https://img.shields.io/badge/status-experimental-B06500)
-![Autograd](https://img.shields.io/badge/feature-autograd-purple)
-![Level](https://img.shields.io/badge/level-low--level%20ML-red)
+![Autograd](https://img.shields.io/badge/autograd-reverse--mode-purple)
+![Status](https://img.shields.io/badge/status-alpha-orange)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey)
 
-Uma implementação **didática e minimalista** de um sistema de diferenciação automática (*reverse-mode autodiff*, ou **autograd**) em C, com suporte a treinamento simples (ML) e base para redes neurais, visando a criação de um framework.
+Uma implementação educacional de um framework de Machine Learning e Diferenciação Automática (**Autograd**) construída do zero em C.
 
-Este projeto é inspirado por implementações educacionais como o **micrograd** de Andrej Karpathy, que constrói um engine de autograd inteiro em poucas linhas de código, permitindo treinar modelos simples com gradiente descendente.
+O objetivo do projeto é compreender profundamente como frameworks modernos como PyTorch e TensorFlow funcionam internamente, implementando manualmente seus principais componentes: tensores, grafos computacionais, backpropagation e otimização.
 
----
+> OBS: Futuramente serão feitos usos práticos
 
-## 🚀 O que é este projeto
+## Sobre o projeto
 
-Este repositório contém:
+O MLInC é um framework experimental que implementa:
 
-✔️ Um **motor de autograd** em C, constrói um grafo computational\
-✔️ Operações matemáticas básicas com derivadas (`add`, `sub`, `mul`, `pow`, `log`)\
-✔️ Backpropagation via topological sort\
-✔️ Loop de treinamento com gradiente descendente\
-✔️ Um exemplo de **regressão linear treinável**\
-✔️ Base para estender para redes neurais
+* Diferenciação automática (*reverse-mode autodiff*)
+* Grafos computacionais
+* Backpropagation
+* Gradiente descendente
+* Tensores multidimensionais
+* Operações matemáticas básicas
+* Operações matriciais
+* Tratamento de erros
+* Gerenciamento manual de memória
 
-O objetivo não é competição de performance, e sim **entendimento profundo** da lógica interna de ML e a criação de um framework simples.
 
----
+# Sistema de Tensores
 
-## 🧠 O que você pode aprender com este projeto
-
-Ele serve como uma **sala de aula prática viva** para:
-
-- Diferenciação automática (*reverse-mode autodiff*)
-- Grafos computacionais e backpropagation
-- Gradiente descendente e otimização
-- Implementação de ML do zero sem dependências externas
-- Fundamentos de estruturas de dados em C (ponteiros, structs, callbacks)
-
-Esse tipo de implementação é similar à base de grandes frameworks como PyTorch, que também constroem um grafo e propagam gradientes automaticamente, embora em C++ e com otimizações profundas.
-
----
-
-## 🧱 Como funciona por baixo dos panos
-
-### 🟢 Nó (`Node`)
-
-Cada operação ou valor é armazenado como um `Node`:
-
-- `value`: valor numérico do nó
-- `grad`: gradiente acumulado
-- `left`, `right`: nós dependentes (grafo)
-- `backward`: função que sabe como propagar gradiente local
-
----
-
-### 🔁 Construção do grafo e backpropagation
-
-1. O forward constrói um grafo de dependências automaticamente
-2. A função `topo()` ordena os nós em uma sequência válida
-3. `backward(loss)` caminha a lista do final para o início
-4. Cada nó aplica sua derivada local multiplicada pelo gradiente acumulado
-
----
-
-### 📊 Treino com gradiente descendente
-
-O loop de treinamento faz:
-
-### forward → backward → gradient descent step
-
-Com a loss definida como **MSE (Mean Squared Error)**.
-
----
-
-## 📦 Exemplo de uso
-
-No `main()`, o código treina um modelo simples:
+O framework possui uma estrutura genérica de tensor:
 
 ```c
-Node* w = node(0.5);
-Node* x = node(3.0);
-Node* y = node(2.0);
+typedef struct {
+    int ndim;
+    int* shape;
+    int size;
+    double* data;
+} Tensor;
+```
 
-for (int epoch = 0; epoch < 100; epoch++) {
-    Node* pred = mul(w, x);
-    Node* loss = mse(pred, y);
+Onde:
+
+* `ndim` representa o número de dimensões
+* `shape` representa o formato do tensor
+* `size` representa a quantidade total de elementos
+* `data` armazena os valores em memória contínua
+
+Exemplos:
+
+```text
+Escalar
+ndim = 0
+
+Vetor
+shape = {4}
+ndim = 1
+
+Matriz
+shape = {3,4}
+ndim = 2
+```
+
+
+## Operações de Tensor
+
+### Criação e gerenciamento
+
+* tensor_create()
+* tensor_scalar()
+* tensor_free()
+
+### Acesso
+
+* tensor_index()
+* tensor_get()
+* tensor_set()
+
+### Operações elemento a elemento
+
+* tensor_add()
+* tensor_sub()
+* tensor_mul()
+* tensor_div()
+
+### Operações matriciais
+
+* tensor_transpose()
+* tensor_matmul()
+
+# Sistema de Autograd
+
+Cada valor da computação é representado por um nó do grafo:
+
+```c
+typedef struct GraphNode {
+    Tensor value;
+    Tensor grad;
+    Tensor extra;
+
+    struct GraphNode* left;
+    struct GraphNode* right;
+
+    void (*backward)(struct GraphNode*);
+
+    Operation op;
+
+    int ref_count;
+} GraphNode;
+```
+
+Cada nó armazena:
+
+* valor
+* gradiente
+* operação que o gerou
+* dependências no grafo
+* função de backpropagation
+
+
+## Operações suportadas
+
+### Escalares
+
+* add_node()
+* sub_node()
+* mul_node()
+* div_node()
+* pow_node()
+* log_node()
+* exp_node()
+
+Cada operação possui sua implementação de backward:
+
+```text
+forward -> grafo computacional -> backward -> gradientes
+```
+
+
+# Backpropagation
+
+O algoritmo utiliza:
+
+### Ordenação topológica
+
+```c
+topo(...)
+```
+
+para gerar a sequência correta de propagação.
+
+### Backward
+
+```c
+backward(loss)
+```
+
+que:
+
+1. Constrói a ordem topológica
+2. **Define:**
+
+```text
+∂loss/∂loss = 1
+```
+
+3. Percorre o grafo de trás para frente
+4. Acumula gradientes automaticamente
+
+
+# Otimização
+
+Atualmente o framework implementa:
+
+### Gradient Descent
+
+```c
+step(params, count, lr)
+```
+
+Atualizando:
+
+```text
+peso = peso - learning_rate × gradiente
+```
+
+# Gerenciamento de memória
+
+O projeto implementa contagem de referências:
+
+```c
+retain(node)
+release(node)
+```
+
+permitindo reutilização de nós sem vazamentos de memória.
+
+# Sistema de erros
+
+O framework utiliza um sistema próprio de erros:
+
+```c
+MLInCERROR
+```
+
+incluindo:
+
+* MLINC_NULL_POINTER_ERROR
+* MLINC_OUT_OF_MEMORY_ERROR
+* MLINC_INVALID_DIMENSION_ERROR
+* MLINC_SHAPE_MISMATCH_ERROR
+* MLINC_DIVISION_BY_ZERO_ERROR
+* MLINC_INVALID_OPERATION_ERROR
+* MLINC_OVERFLOW_ERROR
+* MLINC_NAN_ERROR
+
+Erro global:
+
+```c
+extern MLInCERROR mlinc_errno;
+```
+
+---
+
+# Exportação do grafo
+
+O projeto possui integração com GraphViz:
+
+```c
+graph_export(...)
+```
+
+permitindo visualizar o grafo computacional gerado durante o treinamento.
+
+Arquivos `.dot` são exportados para:
+
+```text
+epochs/
+```
+
+e podem ser renderizados com GraphViz.
+
+# Exemplo
+
+Regressão linear simples:
+
+```c
+GraphNode* w = node(-3.0);
+GraphNode* b = node(10.0);
+
+GraphNode* x = node(2.0);
+GraphNode* target = node(12.0);
+
+for (int epoch = 0; epoch < 500; epoch++) {
+
+    GraphNode* wx = mul_node(w, x);
+    GraphNode* pred = add_node(wx, b);
+
+    GraphNode* loss = mse(pred, target);
 
     backward(loss);
-    step(&w, 1, 0.01);
 
-    printf("epoch %d | loss %.4f | weight %.4f\n", epoch, loss->value.data[0], w->value.data[0]);
+    GraphNode* params[] = {w, b};
+
+    step(params, 2, 0.01);
+
+    release(loss);
 }
 ```
 
-Esse exemplo aprende o melhor valor para w que aproxima y ≈ w * x.
+# Roadmap de Objetivos
 
----
+## Curto prazo
 
-📚 Operações suportadas
+* Broadcasting
+* Reduções (sum, mean)
+* ReLU
+* Sigmoid
+* Tanh
+* Softmax
+* Batch operations
 
-1. Adição (add)
-2. Subtração (sub)
-3. Multiplicação (mul)
-4. Potência (pow_node)
-5. Logaritmo (log_node)
+## Médio prazo
 
-Cada uma com seu backward apropriado.
+* Camadas densas (Linear)
+* MLP (Multi-Layer Perceptron)
+* Dataset API
+* DataLoader
 
-Compile com:
+## Longo prazo
 
-> gcc -o c_autograd main.c -lm
+* Convoluções
+* CNNs
+* GPU Backend
+* Serialização de modelos
+* Treinamento em batches
 
-OBS: O -lm é necessário para a biblioteca matemática (pow, log).
 
----
+# Inspirações
 
-🧭 Este projeto já implementa um autograd funcional e uma forma simples de treinar parâmetros. As próximas novidades incluem:
-
-1. Adicionar bias e múltiplos parâmetros
-2. Suportar camadas e ativações (ReLU, Sigmoid, etc.)
-3. Construir uma rede neural multicamada (MLP)
-4. Criar unit tests e liberar memória corretamente
-5. Organizar em múltiplos arquivos (.h / .c)
+- [Micrograd — Andrej Karpathy](https://github.com/karpathy/micrograd)
+- [PyTorch](https://github.com/pytorch/pytorch)
+- [TensorFlow](https://github.com/tensorflow/tensorflow)
+- [TinyGrad](https://github.com/tinygrad/tinygrad)
+- [NumPy](https://github.com/numpy/numpy)

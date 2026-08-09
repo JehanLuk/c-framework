@@ -2,148 +2,95 @@
 #include <stdlib.h>
 #include <math.h>
 
-//Tensor struct for dataset storing and math base.
-typedef struct {
-        int size;
-        double* data;
-} Tensor;
+#include "autograd.h"
+#include "graph.h"
+#include "tensor.h"
+#include "errorcheck.h"
+#include "basic_ops.h"
 
-//Node struct definition and creation.
-typedef struct Node{
-        Tensor value;
-        Tensor grad;
-
-        Tensor extra;
-
-        struct Node* right;
-        struct Node* left;
-
-        void (*backward)(struct Node*);
-} Node;
-
-Tensor tensor_scalar(double v) {
-        Tensor t;
-        t.size = 1;
-        t.data = malloc(sizeof(double));
-        t.data[0] = v;
-        return t;
+// Auxiliar function for errors
+GraphNode* graph_error(MLInCERROR err) {
+        mlinc_errno = err;
+        return NULL;
 }
 
-Node* node(double value) {
-        Node* n = malloc(sizeof(Node));
+GraphNode* node(double value) {
+        GraphNode* n = malloc(sizeof(GraphNode));
 
+        if (!n)
+                graph_error(MLINC_OUT_OF_MEMORY_ERROR);
+        
+        n->extra.ndim = 0;
+        n->extra.shape = NULL;
+        n->extra.size = 0;
+        n->extra.data = NULL;
+        
         n->value = tensor_scalar(value);
         n->grad = tensor_scalar(0.0);
         n->right = NULL;
         n->left = NULL;
         n->backward = NULL;
 
+        n->op = OP_LEAF;
+
+        n->ref_count = 1;
+        n->visited = 0;
+
         return n;
 }
 
-//Operations
+// Free memory functions (to avoid memory leak and preserve weights)
 
-void backward_add(Node* self) {
-        double g = self->grad.data[0];
-
-        self->left->grad.data[0] += g;
+void retain(GraphNode* node) {
+        if (node != NULL)
+                node->ref_count++;
 }
 
-Node* add(Node* a) {
-        double va = a->value.data[0];
-        Node* cons = node(1.0);
-        double vcons = cons->value.data[0];
-        Node* out = node(va + vcons);
+//TODO: Release is still susceptible to change
+void release(GraphNode* node) {
+        if (!node)
+                return;
 
-        out->left = a;
-        out->right = cons;
-        out->backward = backward_add;
+        if (node->ref_count <= 0)
+                return;
 
-        return out;
+        node->ref_count--;
+
+        if (node->ref_count > 0)
+                return;
+
+        release(node->left);
+        release(node->right);
+
+        tensor_free(&node->value);
+        tensor_free(&node->grad);
+        tensor_free(&node->extra);
+
+        node->left = NULL;
+        node->right = NULL;
+        node->backward = NULL;
+
+        free(node);
 }
 
-void backward_sub(Node* self) {
-        double g = self->grad.data[0];
-
-        self->left->grad.data[0] += 1.0 * g;
-        self->right->grad.data[0] += -1.0 * g;
-}
-
-Node* sub(Node* a, Node* b) {
-        double va = a->value.data[0];
-        double vb = b->value.data[0];
-        
-        Node* out = node(va - vb);
-
-        out->left = a;
-        out->right = b;
-        out->backward = backward_sub;
-
-        return out;
-}
-
-void backward_mul(Node* self) {
-        double g = self->grad.data[0];
-        
-        self->left->grad.data[0] += self->right->value.data[0] * g;
-        self->right->grad.data[0] += self->left->value.data[0] * g;
-}
-
-Node* mul(Node* x, Node* y) {
-        double vx = x->value.data[0];
-        double vy = y->value.data[0];
-
-        Node* out = node(vx * vy);
-
-        out->left = x;
-        out->right = y;
-        out->backward = backward_mul;
-
-        return out;
-}
-
-void backward_pow(Node* self) {
-        double g = self->grad.data[0];
-
-        double x = self->left->value.data[0];
-        double k = self->extra.data[0];
-
-        self->left->grad.data[0] += k * pow(x, k - 1.0) * g;
-}
-
-Node* pow_node(Node* x, double k) {
-        double vx = x->value.data[0];
-
-        Node* out = node(pow(vx, k));
-
-        out->left = x;
-        out->extra = tensor_scalar(k);
-        out->backward = backward_pow;
-
-        return out;
-}
-
-void backward_log(Node* self) {
-        double g = self->grad.data[0];
-
-        self->left->grad.data[0] += (1.0 / self->left->value.data[0]) * g;
-}
-
-Node* log_node(Node* b) {
-        double vb = b->value.data[0];
-
-        Node* out = node(log(vb));
-
-        out->left = b;
-        out->backward = backward_log;
-
-        return out;
-}
+//TODO: Reduction Operations
 
 //TOPO (Topological sorting) and backward/backpropagation
 
-void topo(Node* n, Node** list, int* size) {
-        if (!n) return;
+void topo(GraphNode* n, GraphNode** list, int* size) {
+        if (!list)
+                graph_error(MLINC_NULL_POINTER_ERROR);
+
+        if (!size)
+                graph_error(MLINC_NULL_POINTER_ERROR);
+
+        if (!n)
+                return;
+
+        if (n->visited)
+                return;
+
+        n->visited = 1;
 
         topo(n->left, list, size);
         topo(n->right, list, size);
@@ -151,8 +98,11 @@ void topo(Node* n, Node** list, int* size) {
         list[(*size)++] = n;
 }
 
-void backward(Node* loss) {
-        Node* order [1000];
+void backward(GraphNode* loss) {
+        if (!loss)
+                graph_error(MLINC_NULL_POINTER_ERROR);
+
+        GraphNode* order [1000];
         int size = 0;
 
         topo(loss, order, &size);
@@ -164,34 +114,72 @@ void backward(Node* loss) {
                         order[i]->backward(order[i]);
                 }
         }
+
+        for (int i = 0; i < size; i++) {
+                order[i]->visited = 0;
+        }
 }
 
 //Loss (using MSE (Mean Squared Error) as function) and optimization
 
-Node* mse(Node* pred, Node* target) {
-        Node* diff = sub(pred, target);
+GraphNode* mse(GraphNode* pred, GraphNode* target) {
+        GraphNode* diff = sub_node(pred, target);
         return pow_node(diff, 2);
 }
 
-void step(Node** params, int count, double lr) {
+void step(GraphNode** params, int count, double lr) {
+        if (!params)
+                graph_error(MLINC_NULL_POINTER_ERROR);
+
         for (int i = 0; i < count; i++) {
+                if (!params[i])
+                        graph_error(MLINC_NULL_POINTER_ERROR);
                 params[i]->value.data[0] -= lr * params[i]->grad.data[0];
                 params[i]->grad.data[0] = 0.0;
         }
 }
 
 int main() {
-        Node* w = node(0.5);
-        Node* x = node(3.0);
-        Node* y = node(2.0);
+        GraphNode* w = node(-3.0);
+        GraphNode* b = node(10.0);
 
-        for (int epoch = 0; epoch < 100; epoch++) {
-                Node* pred = mul(w, x);
-                Node* loss = mse(pred, y);
+        GraphNode* x = node(2.0);
+        GraphNode* target = node(12.0);
+
+        for (int epoch = 0; epoch < 500; epoch++) {
+
+                GraphNode* wx = mul_node(w, x);
+                GraphNode* pred = add_node(wx, b);
+                GraphNode* loss = mse(pred, target);
 
                 backward(loss);
-                step(&w, 1, 0.01);
 
-                printf("epoch %d | loss %.4f | weight %.4f\n", epoch, loss->value.data[0], w->value.data[0]);
+                GraphNode* params[] = {w,b};
+
+                step(params,2,0.01);
+
+                char filename[128];
+                sprintf(filename,
+                        "epochs/epoch_%03d.dot",
+                        epoch);
+
+                graph_export(loss, filename);
+
+                printf(
+                        "Epoch %d | Loss %.15f | Weight %.15f | Bias %.15f\n",
+                        epoch,
+                        loss->value.data[0],
+                        w->value.data[0],
+                        b->value.data[0]
+                );
+
+                release(loss);
         }
+
+        release(w);
+        release(b);
+        release(x);
+        release(target);
+
+        return 0;
 }
