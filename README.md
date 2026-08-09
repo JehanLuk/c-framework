@@ -4,30 +4,33 @@
 ![Status](https://img.shields.io/badge/status-alpha-orange)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey)
 
-Uma implementação educacional de um framework de Machine Learning e Diferenciação Automática (**Autograd**) construída do zero em C.
+An educational implementation of a Machine Learning and Automatic Differentiation (**Autograd**) framework built entirely from scratch in C.
 
-O objetivo do projeto é compreender profundamente como frameworks modernos como PyTorch e TensorFlow funcionam internamente, implementando manualmente seus principais componentes: tensores, grafos computacionais, backpropagation e otimização.
+The goal of this project is to gain a deep understanding of how modern frameworks such as PyTorch and TensorFlow work internally by manually implementing their core components: tensors, computational graphs, backpropagation, and optimization algorithms.
 
-> OBS: Futuramente serão feitos usos práticos
+> **Note:** Practical applications will be made in future versions.
 
-## Sobre o projeto
+---
 
-O MLInC é um framework experimental que implementa:
+# About the Project
 
-* Diferenciação automática (*reverse-mode autodiff*)
-* Grafos computacionais
+MLInC is an experimental framework that currently implements:
+
+* Automatic Differentiation (*Reverse-Mode Autodiff*)
+* Computational Graphs
 * Backpropagation
-* Gradiente descendente
-* Tensores multidimensionais
-* Operações matemáticas básicas
-* Operações matriciais
-* Tratamento de erros
-* Gerenciamento manual de memória
+* Gradient Descent
+* Multidimensional Tensors
+* Basic Mathematical Operations
+* Matrix Operations
+* Error Handling
+* Manual Memory Management
 
+---
 
-# Sistema de Tensores
+# Tensor System
 
-O framework possui uma estrutura genérica de tensor:
+The framework provides a generic tensor structure:
 
 ```c
 typedef struct {
@@ -38,58 +41,59 @@ typedef struct {
 } Tensor;
 ```
 
-Onde:
+Where:
 
-* `ndim` representa o número de dimensões
-* `shape` representa o formato do tensor
-* `size` representa a quantidade total de elementos
-* `data` armazena os valores em memória contínua
+* `ndim` represents the number of dimensions
+* `shape` represents the tensor shape
+* `size` represents the total number of elements
+* `data` stores the values in contiguous memory
 
-Exemplos:
+Examples:
 
 ```text
-Escalar
+Scalar
 ndim = 0
 
-Vetor
+Vector
 shape = {4}
 ndim = 1
 
-Matriz
+Matrix
 shape = {3,4}
 ndim = 2
 ```
 
+## Tensor Operations
 
-## Operações de Tensor
+### Creation and Memory Management
 
-### Criação e gerenciamento
+* `tensor_create()`
+* `tensor_scalar()`
+* `tensor_free()`
 
-* tensor_create()
-* tensor_scalar()
-* tensor_free()
+### Access
 
-### Acesso
+* `tensor_index()`
+* `tensor_get()`
+* `tensor_set()`
 
-* tensor_index()
-* tensor_get()
-* tensor_set()
+### Element-wise Operations
 
-### Operações elemento a elemento
+* `tensor_add()`
+* `tensor_sub()`
+* `tensor_mul()`
+* `tensor_div()`
 
-* tensor_add()
-* tensor_sub()
-* tensor_mul()
-* tensor_div()
+### Matrix Operations
 
-### Operações matriciais
+* `tensor_transpose()`
+* `tensor_matmul()`
 
-* tensor_transpose()
-* tensor_matmul()
+---
 
-# Sistema de Autograd
+# Autograd System
 
-Cada valor da computação é representado por um nó do grafo:
+Each value in a computation is represented by a graph node:
 
 ```c
 typedef struct GraphNode {
@@ -108,68 +112,77 @@ typedef struct GraphNode {
 } GraphNode;
 ```
 
-Cada nó armazena:
+Each node stores:
 
-* valor
-* gradiente
-* operação que o gerou
-* dependências no grafo
-* função de backpropagation
+* The computed value
+* Its accumulated gradient
+* The operation that generated it
+* References to dependency nodes
+* A local backpropagation function
 
+---
 
-## Operações suportadas
+## Supported Operations
 
-### Escalares
+### Scalar Operations
 
-* add_node()
-* sub_node()
-* mul_node()
-* div_node()
-* pow_node()
-* log_node()
-* exp_node()
+* `add_node()`
+* `sub_node()`
+* `mul_node()`
+* `div_node()`
+* `pow_node()`
+* `log_node()`
+* `exp_node()`
 
-Cada operação possui sua implementação de backward:
+Each operation provides its own backward implementation:
 
 ```text
-forward -> grafo computacional -> backward -> gradientes
+Forward Pass
+      ↓
+Computational Graph
+      ↓
+Backward Pass
+      ↓
+Gradients
 ```
 
+---
 
 # Backpropagation
 
-O algoritmo utiliza:
+The framework uses:
 
-### Ordenação topológica
+### Topological Sorting
 
 ```c
 topo(...)
 ```
 
-para gerar a sequência correta de propagação.
+to generate a valid propagation order.
 
-### Backward
+### Backward Pass
 
 ```c
 backward(loss)
 ```
 
-que:
+which:
 
-1. Constrói a ordem topológica
-2. **Define:**
+1. Builds a topological ordering of the graph
+2. **Sets:**
 
 ```text
 ∂loss/∂loss = 1
 ```
 
-3. Percorre o grafo de trás para frente
-4. Acumula gradientes automaticamente
+3. Traverses the graph in reverse order
+4. Accumulates gradients automatically
 
+---
 
-# Otimização
+# Optimization
 
-Atualmente o framework implementa:
+Currently the framework implements:
 
 ### Gradient Descent
 
@@ -177,69 +190,77 @@ Atualmente o framework implementa:
 step(params, count, lr)
 ```
 
-Atualizando:
+Updating parameters using:
 
 ```text
-peso = peso - learning_rate × gradiente
+weight = weight - learning_rate × gradient
 ```
 
-# Gerenciamento de memória
+---
 
-O projeto implementa contagem de referências:
+# Memory Management
+
+The project implements reference counting:
 
 ```c
-retain(node)
-release(node)
+retain(node);
+release(node);
 ```
 
-permitindo reutilização de nós sem vazamentos de memória.
+allowing node reuse while preventing memory leaks.
 
-# Sistema de erros
+---
 
-O framework utiliza um sistema próprio de erros:
+# Error Handling
+
+The framework includes a custom error system:
 
 ```c
 MLInCERROR
 ```
 
-incluindo:
+including:
 
-* MLINC_NULL_POINTER_ERROR
-* MLINC_OUT_OF_MEMORY_ERROR
-* MLINC_INVALID_DIMENSION_ERROR
-* MLINC_SHAPE_MISMATCH_ERROR
-* MLINC_DIVISION_BY_ZERO_ERROR
-* MLINC_INVALID_OPERATION_ERROR
-* MLINC_OVERFLOW_ERROR
-* MLINC_NAN_ERROR
+* `MLINC_NULL_POINTER_ERROR`
+* `MLINC_OUT_OF_MEMORY_ERROR`
+* `MLINC_INVALID_DIMENSION_ERROR`
+* `MLINC_SHAPE_MISMATCH_ERROR`
+* `MLINC_DIVISION_BY_ZERO_ERROR`
+* `MLINC_INVALID_OPERATION_ERROR`
+* `MLINC_OVERFLOW_ERROR`
+* `MLINC_NAN_ERROR`
 
-Erro global:
+Global error variable:
 
 ```c
 extern MLInCERROR mlinc_errno;
 ```
 
-# Exportação do grafo
+---
 
-O projeto possui integração com [GraphViz](https://graphviz.org/):
+# Graph Export
+
+The project integrates with GraphViz:
 
 ```c
 graph_export(...)
 ```
 
-permitindo visualizar o grafo computacional gerado durante o treinamento.
+allowing visualization of computational graphs generated during training.
 
-Arquivos `.dot` são exportados para:
+Generated `.dot` files are exported to:
 
 ```text
 epochs/
 ```
 
-e podem ser renderizados com GraphViz.
+and can be rendered using GraphViz.
 
-# Exemplo
+---
 
-Regressão linear simples:
+# Example
+
+Simple Linear Regression:
 
 ```c
 GraphNode* w = node(-3.0);
@@ -265,38 +286,41 @@ for (int epoch = 0; epoch < 500; epoch++) {
 }
 ```
 
-# Roadmap de Objetivos
+---
 
-## Curto prazo
+# Development Roadmap
+
+## Short-Term Goals
 
 * Broadcasting
-* Reduções (sum, mean)
+* Reduction Operations (`sum`, `mean`)
 * ReLU
 * Sigmoid
 * Tanh
 * Softmax
-* Batch operations
+* Batch Operations
 
-## Médio prazo
+## Mid-Term Goals
 
-* Camadas densas (Linear)
+* Dense Layers (Linear)
 * MLP (Multi-Layer Perceptron)
 * Dataset API
 * DataLoader
 
-## Longo prazo
+## Long-Term Goals
 
-* Convoluções
-* CNNs
+* Convolutions
+* CNN Support
 * GPU Backend
-* Serialização de modelos
-* Treinamento em batches
+* Model Serialization
+* Batch Training
 
+---
 
-# Inspirações
+# Inspirations
 
-- [Micrograd — Andrej Karpathy](https://github.com/karpathy/micrograd)
-- [PyTorch](https://github.com/pytorch/pytorch)
-- [TensorFlow](https://github.com/tensorflow/tensorflow)
-- [TinyGrad](https://github.com/tinygrad/tinygrad)
-- [NumPy](https://github.com/numpy/numpy)
+* [Micrograd — Andrej Karpathy](https://github.com/karpathy/micrograd)
+* [PyTorch](https://github.com/pytorch/pytorch)
+* [TensorFlow](https://github.com/tensorflow/tensorflow)
+* [TinyGrad](https://github.com/tinygrad/tinygrad)
+* [NumPy](https://github.com/numpy/numpy)

@@ -1,4 +1,7 @@
 .vscode/
 MLStudies.tldr
-c_autograd.exe
+/bin
+/build
+/obj
+/output
 epoch_*
