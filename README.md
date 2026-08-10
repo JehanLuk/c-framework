@@ -1,8 +1,9 @@
 # MLInC — Machine Learning in C
 
-![Autograd](https://img.shields.io/badge/autograd-reverse--mode-purple)
-![Status](https://img.shields.io/badge/status-alpha-orange)
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey)
+![Build](https://img.shields.io/badge/build-CMake-green)
+![Status](https://img.shields.io/badge/status-experimental-B06500)
+![Autograd](https://img.shields.io/badge/feature-autograd-purple)
+![Level](https://img.shields.io/badge/level-low--level%20ML-red)
 
 An educational implementation of a Machine Learning and Automatic Differentiation (**Autograd**) framework built entirely from scratch in C.
 
@@ -25,8 +26,6 @@ MLInC is an experimental framework that currently implements:
 * Matrix Operations
 * Error Handling
 * Manual Memory Management
-
----
 
 # Tensor System
 
@@ -285,6 +284,53 @@ for (int epoch = 0; epoch < 500; epoch++) {
     release(loss);
 }
 ```
+
+---
+
+# Building the Project
+
+MLInC uses [CMake](https://cmake.org/) as its build system.
+
+### Requirements
+- GCC (MinGW/MSYS2 on Windows)
+- CMake 3.16+
+
+### Clone the Repository
+
+`git clone https://github.com/<your-username>/MLInC.git`
+
+
+### Configure the Build
+
+`cmake -B build`
+
+### Compile
+`cmake --build build`
+
+This generates the executable inside the build directory.
+
+---
+### To Run:
+
+**On Windows:**
+
+`./build/mlinc.exe`
+
+**On Linux/macOS:**
+
+`./build/mlinc`
+
+### To completely rebuild the project:
+
+`cmake --build build --clean-first`
+
+> Use to clean the first build
+
+***Or remove the build directory and configure again:***
+
+```rm -rf build
+cmake -B build
+cmake --build build```
 
 ---
 
