@@ -7,12 +7,6 @@
 #include "basic_ops.h"
 #include "errorcheck.h"
 
-// Auxiliar functions for errors
-GraphNode* graph_error(MLInCERROR err) {
-        mlinc_errno = err;
-        return NULL;
-}
-
 int graph_validate_binary(GraphNode* left, GraphNode* right) {
         if (!left || !right) {
                 mlinc_errno = MLINC_NULL_POINTER_ERROR;

@@ -26,6 +26,12 @@ const char* op_name(Operation op) {
     }
 }
 
+// Auxiliar function for errors
+GraphNode* graph_error(MLInCERROR err) {
+    mlinc_errno = err;
+    return NULL;
+}
+
 void graph_export(GraphNode* root, const char* filename) {
     FILE* f = fopen(filename, "w");
 

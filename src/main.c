@@ -8,17 +8,11 @@
 #include "errorcheck.h"
 #include "basic_ops.h"
 
-// Auxiliar function for errors
-GraphNode* graph_error(MLInCERROR err) {
-        mlinc_errno = err;
-        return NULL;
-}
-
 GraphNode* node(double value) {
         GraphNode* n = malloc(sizeof(GraphNode));
 
         if (!n)
-                graph_error(MLINC_OUT_OF_MEMORY_ERROR);
+                return graph_error(MLINC_OUT_OF_MEMORY_ERROR);
         
         n->extra.ndim = 0;
         n->extra.shape = NULL;
@@ -78,11 +72,15 @@ void release(GraphNode* node) {
 //TOPO (Topological sorting) and backward/backpropagation
 
 void topo(GraphNode* n, GraphNode** list, int* size) {
-        if (!list)
+        if (!list) {
                 graph_error(MLINC_NULL_POINTER_ERROR);
+                return;
+        }
 
-        if (!size)
+        if (!size) {
                 graph_error(MLINC_NULL_POINTER_ERROR);
+                return;
+        }
 
         if (!n)
                 return;
@@ -99,8 +97,10 @@ void topo(GraphNode* n, GraphNode** list, int* size) {
 }
 
 void backward(GraphNode* loss) {
-        if (!loss)
+        if (!loss) {
                 graph_error(MLINC_NULL_POINTER_ERROR);
+                return;
+        }
 
         GraphNode* order [1000];
         int size = 0;
@@ -128,12 +128,16 @@ GraphNode* mse(GraphNode* pred, GraphNode* target) {
 }
 
 void step(GraphNode** params, int count, double lr) {
-        if (!params)
+        if (!params) {
                 graph_error(MLINC_NULL_POINTER_ERROR);
+                return;
+        }
 
         for (int i = 0; i < count; i++) {
-                if (!params[i])
+                if (!params[i]) {
                         graph_error(MLINC_NULL_POINTER_ERROR);
+                        return;
+                }
                 params[i]->value.data[0] -= lr * params[i]->grad.data[0];
                 params[i]->grad.data[0] = 0.0;
         }

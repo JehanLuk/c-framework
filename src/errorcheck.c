@@ -1,4 +1,8 @@
+#include <stdio.h>
+
 #include "errorcheck.h"
+#include "graph.h"
+#include "tensor.h"
 
 MLInCERROR mlinc_errno = ML_OK;
 

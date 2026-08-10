@@ -1,7 +1,5 @@
 .vscode/
 MLStudies.tldr
-/bin
 /build
 /obj
-/output
 epoch_*

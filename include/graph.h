@@ -3,6 +3,9 @@
 
 #include "autograd.h"
 #include "tensor.h"
+#include "errorcheck.h"
+
+GraphNode* graph_error(MLInCERROR err);
 
 void graph_export(GraphNode* root, const char* filename);
 

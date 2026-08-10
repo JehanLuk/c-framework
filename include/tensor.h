@@ -1,6 +1,8 @@
 #ifndef TENSOR_H
 #define TENSOR_H
 
+#include "errorcheck.h"
+
 //Tensor struct for dataset storing and math base
 typedef struct {
     int ndim;
@@ -8,6 +10,8 @@ typedef struct {
     int size;
     double* data;
 } Tensor;
+
+Tensor tensor_error(MLInCERROR err);
 
 Tensor tensor_create(int ndim, const int* shape);
 Tensor tensor_scalar(double value);

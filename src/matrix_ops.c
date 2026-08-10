@@ -5,14 +5,6 @@
 #include "tensor.h"
 #include "errorcheck.h"
 
-// Auxiliar function for errors
-Tensor tensor_error(MLInCERROR err) {
-    mlinc_errno = err;
-
-    Tensor empty = {0};
-    return empty;
-}
-
 //TODO: Matrix Operations
 
 Tensor tensor_add (const Tensor* a, const Tensor* b) {
