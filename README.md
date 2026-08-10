@@ -328,9 +328,11 @@ This generates the executable inside the build directory.
 
 ***Or remove the build directory and configure again:***
 
-```rm -rf build
+```
+rm -rf build
 cmake -B build
-cmake --build build```
+cmake --build build
+```
 
 ---
 
