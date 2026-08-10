@@ -307,7 +307,7 @@ MLInC uses [CMake](https://cmake.org/) as its build system.
 ### Compile
 `cmake --build build`
 
-This generates the executable inside the build directory.
+> This generates the executable inside the build directory.
 
 ---
 ### To Run:
@@ -326,7 +326,7 @@ This generates the executable inside the build directory.
 
 > Use to clean the first build
 
-***Or remove the build directory and configure again:***
+**Or remove the build directory and configure again:**
 
 ```
 rm -rf build
