@@ -320,7 +320,7 @@ This generates the executable inside the build directory.
 
 `./build/mlinc`
 
-### To completely rebuild the project:
+**To completely rebuild/clean the project:**
 
 `cmake --build build --clean-first`
 
